@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#03040a">
 <title>Nexora · Radio mundial</title>
 <style>
 :root{--bg:#03040a;--panel:#0a0c18;--tile:#0f1226;--field:#070914;--line:#1f2446;--tx:#f4f6ff;--mut:#8f96b8;--c1:#18d6ee;--c2:#b052f5;--grad:linear-gradient(120deg,#18d6ee,#2f7cf5 42%,#a21cf0 78%,#d726e8)}
@@ -51,14 +51,46 @@ input:focus,select:focus,button:focus-visible{outline:2px solid var(--c1);outlin
 footer{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;max-width:1200px;margin:0 auto;padding:26px 24px 40px;border-top:1px solid var(--line);text-align:center;color:var(--mut);font-size:.9rem}
 footer a{justify-self:end;display:flex;transition:.15s}footer a:hover{transform:scale(1.12)}
 footer b{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+/* ===== Mejoras de interfaz y responsive ===== */
+.top div,.sbar div,header,main,footer{max-width:1320px}
+.sbar{position:sticky;top:0;z-index:8;background:#03040ae8;backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.sbar div{margin:auto;padding:10px 24px}
+.sbar input{margin:0;padding:13px 16px 13px 46px;border-radius:14px;background:var(--field) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='18' height='18' fill='none' stroke='%238f96b8' stroke-width='2'><circle cx='8' cy='8' r='6'/><path d='m13 13 4 4'/></svg>") no-repeat 16px center}
+.sbar input:focus{border-color:var(--c2)}
+.rh{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.rh h2{margin:0;font-size:1.2rem;font-weight:700}#clr{padding:6px 12px;font-size:13px;color:var(--c1)}
+.card{padding:12px}.lg{width:60px;height:60px}
+.lg::after{content:"▶";position:absolute;inset:0;display:grid;place-items:center;background:#000a;opacity:0;transition:.15s;font-size:20px}.card:hover .lg::after{opacity:1}
+.card.now .nm::before{content:"♪ ";color:var(--c1)}
+.chip{padding:7px 12px}
+.sk{pointer-events:none}.sk .lg,.sk .nm,.sk .sb{background:linear-gradient(90deg,#ffffff08,#ffffff18,#ffffff08);background-size:200% 100%;animation:sh 1.2s infinite;border-radius:8px}
+.sk .nm{height:14px;margin-bottom:8px;width:70%}.sk .sb{height:10px;width:45%}.sk .lg::after{display:none}@keyframes sh{to{background-position:-200% 0}}
+#grid{grid-template-columns:repeat(auto-fill,minmax(270px,1fr))}
+#bar{padding-left:max(14px,calc((100vw - 1320px)/2 + 24px));padding-right:max(14px,calc((100vw - 1320px)/2 + 24px));padding-bottom:calc(10px + env(safe-area-inset-bottom))}
+.ctl{margin-left:auto}
+@media(min-width:901px){aside{top:84px;max-height:calc(100vh - 200px)}main{grid-template-columns:360px minmax(0,1fr)}}
+@media(max-width:700px){
+ body{padding-bottom:175px}
+ .top div,.sbar div,header{padding-left:14px;padding-right:14px}.top div{padding-top:12px;padding-bottom:12px}
+ .brand b{font-size:1.5rem}header{padding-top:18px}
+ button:not(.chip):not(.fav),select,input{min-height:44px}
+ .tabs{display:grid;grid-template-columns:repeat(2,1fr)}.tabs button{width:100%}
+ #bar{gap:8px;padding-left:12px;padding-right:12px}#bar .in{flex:1}
+ .ctl{width:100%;justify-content:space-between;flex-wrap:nowrap;margin:0}
+ #bar input[type=range]{display:none}
+ footer{grid-template-columns:1fr;justify-items:center;gap:12px}footer a{justify-self:center}footer span:first-child{display:none}
+}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style></head><body>
 <div id="toast"></div>
 <nav class="top"><div><a class="brand" id="brand" href="https://nexoraunktools.blogspot.com" aria-label="Ir a la página principal de Nexora"><b>NEX<i>ORA</i></b><small>Tools &amp; Resources</small></a></div></nav>
 <header><h1>Radio mundial</h1><p id="stats">Radios de todos los países, separadas por provincia o estado</p></header>
+<div class="sbar"><div><input id="q" type="search" placeholder="Buscar emisora por nombre…" aria-label="Buscar emisora"></div></div>
 <main>
 <aside>
- <details class="pn" open><summary>🔎 Buscar y filtrar</summary><div>
-  <input id="q" type="search" placeholder="Buscar emisora por nombre…">
+ <details class="pn" id="pfl" open><summary id="pft">🎛 Filtros</summary><div>
+  
   <input id="cs" placeholder="🌎 Buscar país…" autocomplete="off"><div id="cl"></div>
   <select id="ord"><option value="clickcount">🔥 Más escuchadas</option><option value="votes">⭐ Más votadas</option><option value="name">🔤 A–Z</option><option value="bitrate">🎧 Mejor calidad</option><option value="random">🎲 Al azar</option></select>
  </div></details>
@@ -71,6 +103,7 @@ footer b{background:var(--grad);-webkit-background-clip:text;background-clip:tex
   <button class="tab on" data-v="all">🌎 Explorar</button><button class="tab" id="tall">📻 Todas las radios</button><button class="tab" data-v="fav">♥ Favoritas</button><button class="tab" data-v="rec">🕘 Recientes</button>
   <button id="sur">🎲 Sorpréndeme</button><button id="exp">💾 Respaldo</button>
  </div>
+ <div class="rh"><h2 id="ttl"></h2><button id="clr" hidden>✕ Limpiar filtros</button></div>
  <div id="grid"></div><div id="st"></div><button id="more" hidden>Cargar más</button>
 </section>
 </main>
@@ -101,18 +134,23 @@ const esc=s=>String(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&g
 const flag=c=>c&&c.length==2?String.fromCodePoint(...[...c.toUpperCase()].map(x=>127397+x.charCodeAt())):'🌐';
 const toast=t=>{const e=$('#toast');e.textContent=t;e.style.display='block';clearTimeout(e._t);e._t=setTimeout(()=>e.style.display='none',3500)};
 const slim=s=>({id:s.stationuuid,n:(s.name||'').trim(),u:s.url_resolved||s.url,f:s.favicon,c:s.countrycode,cn:s.country,s:s.state,t:(s.tags||'').split(',').filter(Boolean).slice(0,3).join(' · '),b:s.bitrate,k:s.codec});
-const isFav=id=>fav.some(x=>x.id==id),status=t=>$('#st').textContent=t;
+const isFav=id=>fav.some(x=>x.id==id),status=t=>{grid.querySelectorAll('.sk').forEach(e=>e.remove());$('#st').textContent=t};
 function card(o){OB[o.id]=o;return `<div class="card${cur&&cur.id==o.id?' now':''}" data-id="${o.id}"><div class="lg">📻${o.f?`<img loading="lazy" src="${esc(o.f)}" onerror="this.remove()">`:''}</div><div class="in"><div class="nm">${esc(o.n)}</div><div class="sb">${flag(o.c)} ${esc(o.cn||'')}${o.s?' · '+esc(o.s):''}${o.b?' · '+o.b+'k':''}</div><div class="sb">${esc(o.t)}</div></div><button class="fav${isFav(o.id)?' on':''}">♥</button></div>`}
-function render(a,rep){if(rep)grid.innerHTML='';grid.insertAdjacentHTML('beforeend',a.map(card).join(''))}
+function render(a,rep){if(rep)grid.innerHTML='';else grid.querySelectorAll('.sk').forEach(e=>e.remove());grid.insertAdjacentHTML('beforeend',a.map(card).join(''))}
+let tok=0;
+const SK=Array(9).fill('<div class="card sk"><div class="lg"></div><div class="in"><div class="nm"></div><div class="sb"></div></div></div>').join('');
+function ttl(){const a=S.view=='all',p=[];if(S.view=='fav')p.push('♥ Favoritas');else if(S.view=='rec')p.push('🕘 Recientes');else{if(S.q)p.push('“'+S.q+'”');if(S.tag)p.push('#'+S.tag);if(S.cc)p.push(flag(S.cc)+' '+es(S.cc));if(S.st)p.push(S.st);if(!p.length)p.push('🌎 Todo el mundo')}
+ $('#ttl').textContent=p.join(' · ');const f=[S.cc&&es(S.cc),S.st].filter(Boolean).join(' · ');$('#pft').textContent='🎛 Filtros'+(f?' · '+f:'');$('#clr').hidden=!(a&&(S.q||S.cc||S.st||S.tag))}
+$('#clr').onclick=()=>{S.q=S.tag=S.st='';$('#q').value='';mark();pick('')};
 async function load(reset){
- if(reset){S.off=0;list=[];grid.innerHTML=''}
+ if(reset){S.off=0;list=[];grid.innerHTML=SK;tok++;busy=0;$('#more').hidden=true;$('#st').textContent=''}
+ ttl();
  if(S.view!='all'){list=S.view=='fav'?fav:rec;render(list,true);$('#more').hidden=true;status(list.length?'':'Todavía no hay emisoras acá');return}
- if(busy)return;busy=1;
+ if(busy)return;busy=1;const my=tok;
  const p=new URLSearchParams({hidebroken:true,is_https:true,order:S.order,reverse:S.order!='name',limit:48,offset:S.off});
  if(S.q)p.set('name',S.q);if(S.cc)p.set('countrycode',S.cc);if(S.tag)p.set('tag',S.tag);if(S.st){p.set('state',S.st);p.set('stateExact',true)}
- status('Cargando…');
- try{const r=await api('/json/stations/search?'+p);S.off+=r.length;const n=r.map(slim);list=list.concat(n);render(n);$('#more').hidden=r.length<48;status(list.length?'':'Sin resultados')}catch(e){status('No se pudo conectar con el directorio. Reintentá en un momento.')}
- busy=0}
+ try{const r=await api('/json/stations/search?'+p);if(my!=tok)return;S.off+=r.length;const n=r.map(slim);list=list.concat(n);render(n);$('#more').hidden=r.length<48;status(list.length?'':'Sin resultados para estos filtros')}catch(e){if(my==tok)status('No se pudo conectar con el directorio. Reintentá en un momento.')}
+ if(my==tok)busy=0}
 function ui(o){cur=o;$('#bn').textContent=o.n;$('#bt').textContent=flag(o.c)+' '+(o.cn||'')+(o.s?' · '+o.s:'');$('#bl').innerHTML='📻'+(o.f?`<img src="${esc(o.f)}" onerror="this.remove()">`:'');$('#bf').classList.toggle('on',isFav(o.id));document.querySelectorAll('.card').forEach(c=>c.classList.toggle('now',c.dataset.id==o.id))}
 function play(o){
  ui(o);au.src=o.u;au.play().catch(()=>toast('Esta emisora no responde, probá otra'));
@@ -163,7 +201,7 @@ document.addEventListener('click',e=>{const c=e.target.closest('.chip');if(!c)re
  if(k=='q'){S.q=on?'':v;S.tag='';$('#q').value=S.q;if(!on){S.cc=S.cn=S.st='';$('#cs').value='';$('#pst').hidden=true}}else{S.tag=on?'':v;S.q='';$('#q').value=''}
  view('all');mark();load(true)});
 chips($('#feat'),FEAT,'q');chips($('#tags'),TAGS,'tag');
-if(innerWidth<900)['#pf','#pg'].forEach(s=>$(s).open=false);
+if(innerWidth<900)['#pfl','#pst','#pf','#pg'].forEach(s=>$(s).open=false);
 (async()=>{
  try{const s=await api('/json/stats');$('#stats').textContent=(s.stations||0).toLocaleString('es')+' emisoras · '+(s.countries||0)+' países · por provincia o estado'}catch(e){}
  const reg=((navigator.language||'').split('-')[1]||'').toUpperCase();
